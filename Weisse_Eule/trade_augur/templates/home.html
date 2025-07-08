@@ -1,0 +1,114 @@
+<div style="display:flex; justify-content:space-between; align-items:center; padding:20px; background:#2c3e50; color:white;">
+  <h1 style="margin:0; font-family:sans-serif;">
+    📰 News Headlines Impact on Bitcoin Trade
+  </h1>
+  <a href="{% url 'accounts:logout' %}" style="
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    background:#e74c3c;
+    padding:8px 14px;
+    border-radius:4px;
+    transition:background 0.3s;">
+    Logout
+  </a>
+</div>
+
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f6fa;
+    color: #333;
+  }
+
+  a[href="{% url 'accounts:logout' %}"]:hover {
+    background: #c0392b;
+  }
+
+  table {
+    width: 90%;
+    margin: 40px auto;
+    border-collapse: collapse;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    background: white;
+  }
+
+  th {
+    background-color: #2c3e50;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+    text-align: left;
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+  }
+
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .circle {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .green {
+    background-color: #2ecc71;
+  }
+
+  .red {
+    background-color: #e74c3c;
+  }
+
+  .model-line {
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+
+  .no-news {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+  }
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Published On (UTC)</th>
+      <th>Hexenmeinung</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for elem in news %}
+    <tr>
+      <td>{{ elem.title }}</td>
+      <td>{{ elem.published_on }}</td>
+      <td>
+        {% for model, value in elem.hexenmeinung.items %}
+          <div class="model-line">
+            {% if value|lower|slice:":2" == "no" %}
+              <span class="circle green"></span>
+            {% else %}
+              <span class="circle red"></span>
+            {% endif %}
+            {{ model }}
+          </div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3" class="no-news">No news available.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
