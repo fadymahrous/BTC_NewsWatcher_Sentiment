@@ -1,25 +1,27 @@
 
+# BTC_NewsWatcher_Sentiment
 
-```markdown
-# Market Sentiment Bitcoin News Aggregator
+Monitors Bitcoin-related news headlines, analyzes their sentiment using multiple language models, and tracks their potential market impact.
 
-It uses multiple language models from Amazon Bedrock to gather diverse opinions (the **Hexen Round Table**) and stores results in a PostgreSQL database.
 ---
 
 ## ✨ Features
 
-- Periodic fetching and analysis of market news headlines from www.forexlive.com.
-- Multiple models (Llama, Mistral, Sonnet) for sentiment assessment.
-- Results stored for later review and analysis.
+- Periodically fetches and analyzes news headlines from [ForexLive](https://www.forexlive.com).
+- Uses multiple language models (Llama, Mistral, Sonnet) for sentiment assessment.
+- Stores results in PostgreSQL for review and analysis.
 - Django frontend to display and manage collected insights.
-- I display only the last 24 hours of data. A green indicator means the news is not impacting Bitcoin, while a red indicator shows it is impacting Bitcoin.
+- Displays the last 24 hours of data with color indicators:
+  - 🟢 **Green**: No impact on Bitcoin.
+  - 🔴 **Red**: Potential impact on Bitcoin.
 
-![alt text](sample_screenshot.png)
+![Screenshot](sample_screenshot.png)
+
 ---
 
 ## 🧠 Prompt Used for Evaluation
 
-Before any news headline is analyzed, the following prompt is sent to each model:
+Before analyzing any headline, the following prompt is sent to each model:
 
 ```
 
@@ -34,24 +36,23 @@ Statement:
 
 ---
 
-## 🗂️ Project Structure Overview
+## 🗂️ Project Structure
 
 ```
 
 Django\_Spielplatz/
-├── Market\_Sentiment/                 # Python module for sentiment analysis and ingestion
-│   ├── Database\_Engine.py            # Database handling (PostgreSQL insertions)
-│   ├── Get\_Latest\_Headlines\_Forexlive.py  # Web scraping ForexLive headlines
-│   ├── Hexen\_Round\_Table.py          # Orchestrates model-based sentiment voting
-│   └── LLM\_Judging.py                # Interfaces with Amazon Bedrock LLMs
+├── Market\_Sentiment/
+│   ├── Database\_Engine.py            # PostgreSQL insertion logic
+│   ├── Get\_Latest\_Headlines\_Forexlive.py  # Web scraping ForexLive
+│   ├── Hexen\_Round\_Table.py          # Model-based sentiment voting
+│   └── LLM\_Judging.py                # Amazon Bedrock LLMs
 ├── Weisse\_Eule/                      # Django project
-│   ├── accounts/                     # User authentication (login, registration)
+│   ├── accounts/                     # User authentication
 │   ├── trade\_augur/                  # Display sentiment-annotated headlines
-│   └── Weisse\_Eule/                  # Core Django settings
-├── main.py                           # Background script to run sentiment cycles
+│   └── Weisse\_Eule/                  # Django settings
+├── main.py                           # Background sentiment collection
 ├── manage.py                         # Django CLI entry point
-└── .Django\_Spielplatz.code-workspace # VS Code workspace configuration
-└──config\config.ini
+└── config/config.ini                 # Configuration file
 
 ````
 
@@ -59,120 +60,118 @@ Django\_Spielplatz/
 
 ## ⚙️ How It Works
 
-1. **main.py** runs in the background:
-   - Periodically fetches ForexLive headlines.
-   - Calls `HexenRoundTable` to get LLM assessments.
-   - Stores results in PostgreSQL via `DatabaseEngine`.
+1. **main.py**
+   - Periodically fetches headlines.
+   - Uses `HexenRoundTable` for LLM assessments.
+   - Stores results in PostgreSQL.
 
-2. **Django frontend** (`Weisse_Eule` project):
+2. **Django Frontend**
    - Displays stored headlines with sentiment verdicts.
    - Provides user login and management.
 
-3. **Market_Sentiment** acts as the data ingestion and machine learning layer.
+3. **Market_Sentiment**
+   - Handles ingestion and analysis workflows.
 
 ---
 
 ## 🐍 Technology Stack
 
-### Backend
+**Backend**
 - Python 3.x
-- Django (web framework)
-- SQLAlchemy (database ORM)
+- Django
+- SQLAlchemy
 
-### Database
+**Database**
 - PostgreSQL (AWS RDS)
 
-### Cloud AI Services
-- Amazon Bedrock (multiple LLMs)
-- Boto3 SDK (Bedrock integration)
+**Cloud AI**
+- Amazon Bedrock (LLMs)
+- Boto3 SDK
 
-### Web Scraping
+**Web Scraping**
 - Requests
 - BeautifulSoup
 
-### Frontend
-- HTML5/CSS3 (Django templates)
+**Frontend**
+- Django templates (HTML/CSS)
 
-### Developer Tools
+**Developer Tools**
 - Visual Studio Code
 - Python virtual environments
 
 ---
 
-## 🛠️ Key Components Overview
+## 🛠️ Key Components
 
-### 1️⃣ `Database_Engine.py`
-Handles storing results in PostgreSQL via SQLAlchemy.
+### `Database_Engine.py`
+Stores results in PostgreSQL.
 
-- **`__init__`**: Initializes the connection to the RDS instance.
-- **`load_to_database()`**: Inserts records into `trade_augur_news_healines`.
+- `__init__`: Initializes connection parameters (configure in `config.ini`).
+- `load_to_database()`: Inserts records into `trade_augur_news_headlines`.
 
----
+### `Get_Latest_Headlines_Forexlive.py`
+Scrapes and processes recent headlines.
 
-### 2️⃣ `Get_Latest_Headlines_Forexlive.py`
-Fetches and parses recent ForexLive news headlines.
+- Downloads webpage.
+- Extracts metadata.
+- Filters by publish time.
 
-- Downloads and parses the webpage.
-- Extracts article metadata and filters by publish time.
-- Cleans HTML content.
-
----
-
-### 3️⃣ `Hexen_Round_Table.py`
-Coordinates multiple LLMs to reach a sentiment consensus.
+### `Hexen_Round_Table.py`
+Coordinates model opinions.
 
 - Fetches fresh headlines.
-- Sends each headline to all configured models.
-- Collects “Yes”/“No” opinions for storage.
+- Sends them to all models.
+- Collects Yes/No votes.
+
+### `LLM_Judging.py`
+Queries Amazon Bedrock models.
+
+- Locates model ARNs.
+- Sends prompts and retrieves answers.
 
 ---
 
-### 4️⃣ `LLM_Judging.py`
-Handles querying Amazon Bedrock LLMs.
+## 🚀 Installation
 
-- Locates the model ARN by partial name.
-- Sends the prompt and retrieves the answer.
+Install the dependencies:
 
----
-
-## 🚀 packages needed
-
-Django>=4.0
-sqlalchemy>=2.0
-psycopg2-binary
-boto3
-requests
-beautifulsoup4
+```bash
+pip install Django>=4.0 sqlalchemy>=2.0 psycopg2-binary boto3 requests beautifulsoup4
 ````
 
-**To connect to DB:**
-Be sure to put your RDS database connections in config.ini
+---
 
-**To Run Django server:**
+## 🏁 Running the Project
 
-   ```bash
-   python manage.py runserver
-   ```
+**Start Django server:**
 
-**To Start background sentiment collection:**
+```bash
+python manage.py runserver
+```
 
-   ```bash
-   python main.py
-   ```
+**Start background sentiment collection:**
+
+```bash
+python main.py
+```
+
+**Note:** Ensure your database credentials are set in `config/config.ini`.
 
 ---
 
 ## ✍️ Author
 
-Created by [Fady Mahrous](https://github.com/fadymahrous). Contributions welcome!
+Created by [Fady Mahrous](https://github.com/fadymahrous). Contributions are welcome!
 
 ---
 
 ## ⚠️ Disclaimer
 
-This project is a **technical demonstration** of development, automation, and data processing skills.  
-It is **not intended for real-life trading or investment decisions**.  
-Any use of this project or its outputs is entirely **at your own risk and responsibility**.  
+This project is a **technical demonstration** of development, automation, and data processing skills.
+It is **not intended for real-life trading or investment decisions**.
+Any use of this project is entirely **at your own risk and responsibility**.
 The author assumes **no liability** for any losses or damages resulting from the use of this code.
 
 ```
+
+---
