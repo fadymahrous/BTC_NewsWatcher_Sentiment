@@ -3,6 +3,7 @@ import html
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
+from typing import List,Dict
 
 class GetLatestHeadlinesForexlive:
     URL = 'https://www.forexlive.com/'
@@ -19,17 +20,20 @@ class GetLatestHeadlinesForexlive:
         self.session = requests.Session()
         self.session.headers.update(self.HEADERS)
 
-    def clean_html(self, raw_html):
+    def clean_html(self, raw_html)->str:
         """Remove HTML tags and decode entities."""
         raw_html=raw_html.encode("latin1").decode("utf-8")
         soup = BeautifulSoup(raw_html, "html.parser")
         text = soup.get_text(separator=" ")
         return html.unescape(text)
 
-    def get_recent_articles(self, within_last_minutes):
+    def get_recent_articles(self, within_last_minutes:int)->List[Dict]:
         """Fetch and parse articles published within the given timeframe."""
-        response = self.session.get(self.URL)
-        html_content = response.text
+        try:
+            response = self.session.get(self.URL)
+            html_content = response.text
+        except Exception as e:
+            raise RuntimeError(f"Couldnt fetch the Webpage for more details check:{e}") from e
 
         # Uncomment if you want to save the raw HTML for inspection
         # with open('ooo.html', 'w', encoding='utf-8') as f:
@@ -94,6 +98,4 @@ class GetLatestHeadlinesForexlive:
                 if delta_minutes < within_last_minutes:
                     articles_list.append(punket)
 
-        if articles_list:
-            return articles_list
-        return None
+        return articles_list

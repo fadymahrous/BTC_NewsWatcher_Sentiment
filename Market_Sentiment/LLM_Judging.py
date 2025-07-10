@@ -9,7 +9,7 @@ class LLMJudging:
         self.client = boto3.client("bedrock", region_name=self.region_name)
 
 
-    def _get_model_ARN_interface(self):
+    def _get_model_ARN_interface(self,part_of_model_string:str):
         """This method is used to look up the interface beased on the string passed"""
         arn_interfaces_list=[]
         response = self.client.list_inference_profiles(
@@ -30,7 +30,7 @@ class LLMJudging:
             for arn_interface in response.get('inferenceProfileSummaries',[]):
                 arn_interfaces_list.append(arn_interface.get('inferenceProfileArn',''))
         for arn_interface in arn_interfaces_list:
-            if self.part_of_model_string.lower() in arn_interface.lower():
+            if part_of_model_string.lower() in arn_interface.lower():
                 return arn_interface
         return None
 
@@ -40,8 +40,7 @@ class LLMJudging:
         if part_of_model_string is None:
             raise ValueError("you must pase part of the model name to look for it")
         #Get Model  ARN from Amazon Bed Rock and if not exist raise Error       
-        self.part_of_model_string=part_of_model_string
-        self.model_id=self._get_model_ARN_interface()
+        self.model_id=self._get_model_ARN_interface(part_of_model_string)
         if self.model_id is None:
             return "Model_Not_Exist"
 
